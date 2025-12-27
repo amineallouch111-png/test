@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>متجر صناديق ماينكرافت — اسم السيرفر</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070b10;--panel:#1f2a38;--accent:#f5c96b;--text:#f5f5f5;--wood1:#7a4b2b;--wood2:#b07a3a;--glow:#3cff8f}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100vh;background:radial-gradient(circle at top,#0b1a2a,#05070a);color:var(--text);font-family:'Press Start 2P',cursive;display:flex;flex-direction:column}
+header{background:linear-gradient(180deg,#0f1722,#0b0b0b);padding:18px 22px;display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #000;box-shadow:0 10px 30px rgba(0,0,0,.6)}
+nav a{color:#9aff9a;text-decoration:none;margin-left:12px;font-size:11px}
+section{padding:28px 20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px}
+.card{background:linear-gradient(180deg,#212d3f,#141e2b);border:3px solid #000;padding:22px;text-align:center;box-shadow:0 30px 60px rgba(0,0,0,.8);border-radius:14px;position:relative;transition:transform .3s}
+.card:hover{transform:scale(1.03);box-shadow:0 35px 75px rgba(0,0,0,.9)}
+.scene{display:flex;justify-content:center;align-items:center;min-height:220px;position:relative;perspective:1200px}
+.chest{width:220px;height:160px;position:relative;transform-style:preserve-3d;transition:transform .6s ease-in-out;cursor:pointer}
+.chest .base{width:100%;height:110px;position:absolute;bottom:0;background:linear-gradient(180deg,var(--wood1),var(--wood2));border:4px solid #000;border-bottom-width:6px;border-radius:10px;box-shadow:inset 0 0 12px rgba(0,0,0,.5)}
+.chest .band{position:absolute;left:14px;right:14px;top:36px;height:14px;background:#222;border:2px solid #000;border-radius:3px}
+.chest .lid{width:100%;height:70px;position:absolute;top:0;background:linear-gradient(180deg,var(--wood2),var(--wood1));border:4px solid #000;transform-origin:center bottom;border-radius:10px}
+.chest.open{animation:chestShake 1.6s ease-in-out}
+.chest.open .lid{animation:openLid 2.8s forwards cubic-bezier(.2,.8,.2,1)}
+@keyframes chestShake{0%,100%{transform:rotateY(0deg)}25%{transform:rotateY(-12deg)}50%{transform:rotateY(12deg)}75%{transform:rotateY(-6deg)}}
+@keyframes openLid{0%{transform:rotateX(0deg)}50%{transform:rotateX(-75deg)}100%{transform:rotateX(-130deg)}}
+.controls{display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+.btn{padding:10px 12px;background:linear-gradient(180deg,#ffd977,#e5b840);border:3px solid #000;cursor:pointer;font-family:inherit;transition:transform .15s,box-shadow .15s}
+.btn:hover{transform:scale(1.06);box-shadow:0 0 18px #ffd700}
+.reward{display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(1);background:linear-gradient(180deg,#1b2636,#0e1520);border:4px solid var(--accent);border-radius:18px;padding:12px;box-shadow:0 0 0 4px #000,0 0 80px rgba(245,201,107,.9);z-index:20;overflow:hidden;width:420px;height:160px}
+.roller-wrapper{position:relative;width:100%;height:100%;overflow:hidden}
+.roller-track{display:flex;gap:14px;align-items:center;position:absolute;left:0;top:50%;transform:translateY(-50%);will-change:transform;white-space:nowrap}
+.roller-item{min-width:120px;text-align:center;background:#0c1320;border:3px solid #000;border-radius:14px;padding:12px;box-shadow:0 0 30px rgba(255,215,0,.35);flex-shrink:0}
+.roller-indicator{position:absolute;left:50%;top:0;bottom:0;width:4px;background:#ffd700;box-shadow:0 0 20px #ffd700;transform:translateX(-50%);z-index:25}
+.reward.show{animation:rewardPop 1.2s cubic-bezier(.2,.9,.3,1) forwards}
+@keyframes rewardPop{0%{opacity:0;transform:translate(-50%,-10%) scale(.1)}40%{opacity:1;transform:translate(-50%,-60%) scale(2)}70%{opacity:1;transform:translate(-50%,-90%) scale(1.5)}100%{opacity:1;transform:translate(-50%,-80%) scale(1)}}
+.particle{position:absolute;width:10px;height:10px;background:#ffd700;border-radius:50%;pointer-events:none;animation:particle 1s linear forwards}
+@keyframes particle{to{transform:translate(var(--x),var(--y));opacity:0}}
+.item-list-popup{position:absolute;top:10px;right:10px;background:linear-gradient(180deg,#212d3f,#141e2b);border:3px solid #000;padding:12px;display:none;flex-direction:column;max-height:220px;overflow-y:auto;z-index:30;border-radius:10px;font-size:12px;color:#f5f5f5}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:60}
+.modal{background:#0e1620;border:3px solid #000;padding:16px;border-radius:10px;width:360px;color:var(--text);box-shadow:0 10px 40px rgba(0,0,0,.8)}
+.input-row{display:flex;gap:8px;align-items:center}
+.input-row input, .input-row select{flex:1;padding:8px;border-radius:6px;border:2px solid #222;background:#07101a;color:var(--text);font-family:inherit}
+.msg{margin-top:8px;font-size:12px;color:#ffd;min-height:18px}
+.codes-help{margin-top:14px;font-size:11px;color:#ccc}
+.code-admin-panel{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:#141e2b;border:3px solid #000;padding:16px;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,.8);width:560px;max-height:60vh;overflow-y:auto;display:none;flex-direction:column;z-index:70}
+.code-admin-panel h3{margin-top:0;margin-bottom:12px;text-align:center}
+.code-admin-panel .code-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #222}
+.code-admin-panel button{padding:6px 10px;font-size:12px}
+footer{margin-top:auto;background:#05070a;padding:20px;text-align:center;border-top:3px solid #000}
+</style>
+</head>
+<body>
+<header><div>🟩 اسم السيرفر</div><nav><a href="#crates">الصناديق</a><a href="#" id="adminBtn">إدارة الأكواد</a></nav></header>
+<section><h1>متجر صناديق ماينكرافت</h1></section>
+<section id="crates" class="grid">
+  <div class="card">
+    <h3>صندوق أسطوري</h3>
+    <div class="scene">
+      <div class="chest" id="chest3"><div class="lid"></div><div class="band"></div><div class="base"></div></div>
+      <div class="reward" id="r3"></div>
+    </div>
+    <div class="controls">
+      <button class="btn" id="show3">عرض المحتويات</button>
+      <button class="btn" id="redeem3">استعمال كود</button>
+    </div>
+    <div class="item-list-popup" id="popup3"></div>
+  </div>
+
+  <div class="card">
+    <h3>صندوق نادر</h3>
+    <div class="scene">
+      <div class="chest" id="chest2"><div class="lid"></div><div class="band"></div><div class="base"></div></div>
+      <div class="reward" id="r2"></div>
+    </div>
+    <div class="controls">
+      <button class="btn" id="show2">عرض المحتويات</button>
+      <button class="btn" id="redeem2">استعمال كود</button>
+    </div>
+    <div class="item-list-popup" id="popup2"></div>
+  </div>
+
+  <div class="card">
+    <h3>صندوق عادي</h3>
+    <div class="scene">
+      <div class="chest" id="chest1"><div class="lid"></div><div class="band"></div><div class="base"></div></div>
+      <div class="reward" id="r1"></div>
+    </div>
+    <div class="controls">
+      <button class="btn" id="show1">عرض المحتويات</button>
+      <button class="btn" id="redeem1">استعمال كود</button>
+    </div>
+    <div class="item-list-popup" id="popup1"></div>
+  </div>
+</section>
+
+<!-- نافذة إدخال الكود -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal" role="dialog" aria-modal="true" id="redeemModal">
+    <div style="display:flex;justify-content:space-between;align-items:center"><strong>أدخل كود الصندوق</strong><button class="btn" id="closeModal">إغلاق</button></div>
+    <div class="input-row" style="margin-top:12px"><input id="codeInput" placeholder="أدخل الكود هنا" /><button class="btn" id="redeemSubmit">تفعيل</button></div>
+    <div class="msg" id="redeemMsg"></div>
+  </div>
+</div>
+
+<!-- لوحة إدارة الأكواد -->
+<div class="code-admin-panel" id="codeAdminPanel">
+  <h3>لوحة إدارة الأكواد</h3>
+  <div style="display:flex;gap:8px;margin-bottom:10px">
+    <input id="newCodeInput" placeholder="كود جديد (مثال: PROMO1)" />
+    <select id="newCodeType"><option value="common">عادي</option><option value="rare">نادر</option><option value="legendary">أسطوري</option></select>
+    <button class="btn" id="addCodeBtn">إضافة</button>
+  </div>
+  <div id="codesContainer"></div>
+  <button id="closeAdmin" class="btn" style="margin-top:12px;align-self:center">إغلاق</button>
+</div>
+
+<footer>© <span id="year"></span> اسم السيرفر</footer>
+
+<audio id="openSound" src="https://assets.mixkit.co/sfx/preview/mixkit-game-chest-open-1991.mp3"></audio>
+<audio id="rewardSound" src="https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3"></audio>
+
+<script>
+// بيانات الأغراض ونسب الأوزان
+const commonItems=[
+ {img:'120px-Bread_JE2_BE2.png',name:'حليب',weight:10},
+ {img:'120px-Bone_JE2_BE2.png',name:'عظم',weight:10},
+ {img:'120px-Diamond_JE2_BE2.png',name:'3 دايموند',weight:8},
+ {img:'120px-Iron_Ingot_JE2_BE2.png',name:'10 حديد',weight:8},
+ {img:'120px-Iron_Chestplate_JE2_BE2.png',name:'درع حديدي',weight:6},
+ {img:'120px-Iron_Sword_JE2_BE2.png',name:'سيف حديدي',weight:6},
+ {img:'120px-Diamond_Chestplate_(item)_JE1_BE1.png',name:'درع دايموند',weight:4},
+ {img:'120px-Golden_Apple_JE1_BE1.png',name:'تفاحة ذهبية',weight:2}
+];
+const rareItems=[
+ {img:'120px-Diamond_Sword_JE2_BE2.png',name:'سيف دايموند',weight:6},
+ {img:'120px-Diamond_Chestplate_(item)_JE1_BE1.png',name:'درع دايموند',weight:6},
+ {img:'120px-Diamond_Helmet_(item)_JE1_BE1.png',name:'خوذة دايموند',weight:5},
+ {img:'120px-Diamond_Leggings_(item)_JE1_BE1.png',name:'بنطال دايموند',weight:5},
+ {img:'120px-Diamond_Boots_(item)_JE1_BE1.png',name:'حذاء دايموند',weight:4},
+ {img:'120px-Diamond_JE2_BE2.png',name:'10 دايموند',weight:4},
+ {img:'120px-Ender_Pearl_JE2_BE2.png',name:'اندربيرل',weight:3}
+];
+const legendaryItems=[
+ {img:'120px-Netherite_Sword_JE1_BE1.png',name:'سيف نترايت',weight:1},
+ {img:'120px-Golden_Apple_JE1_BE1.png',name:'تفاحة ذهبية',weight:2},
+ {img:'120px-Diamond_Chestplate_(item)_JE1_BE1.png',name:'درع دايموند',weight:1},
+ {img:'120px-Enchanted_Book_JE1_BE1.png',name:'كتاب مبندينق',weight:3},
+ {img:'120px-Eye_of_Ender_JE2_BE2.png',name:'عين اندرمان',weight:1},
+ {img:'120px-Dragon_Egg_JE2_BE2.png',name:'بيضة تنين',weight:1},
+ {img:'120px-Netherite_Helmet_JE1_BE1.png',name:'خوذة نترايت',weight:1},
+ {img:'120px-Beacon_JE2_BE2.png',name:'بيكون',weight:1}
+];
+function generateWeightedPool(items){ const pool=[]; items.forEach(i=>{ for(let j=0;j<i.weight;j++) pool.push(i); }); return pool; }
+const rewardPools={ common:generateWeightedPool(commonItems), rare:generateWeightedPool(rareItems), legendary:generateWeightedPool(legendaryItems) };
+
+// أكواد (تُحفظ محلياً)
+let codes = JSON.parse(localStorage.getItem('crate_codes')||'null') || {
+  'LEGENDARY123': { type: 'legendary', used: false },
+  'RARE123': { type: 'rare', used: false },
+  'COMMON123': { type: 'common', used: false }
+};
+function saveCodes(){ localStorage.setItem('crate_codes', JSON.stringify(codes)); }
+
+// وظائف إدارة الأكواد
+const adminPanel = document.getElementById('codeAdminPanel');
+const codesContainer = document.getElementById('codesContainer');
+function renderCodes(){ codesContainer.innerHTML=''; for(const [key,value] of Object.entries(codes)){ const row=document.createElement('div'); row.className='code-row'; row.innerHTML=`<span style="direction:ltr">${key}</span><span>${value.type} - ${value.used?'<strong style="color:#f66">مستعمل</strong>':'متاح'}</span>`; const del=document.createElement('button'); del.textContent='حذف'; del.onclick=()=>{ delete codes[key]; saveCodes(); renderCodes(); }; row.appendChild(del); codesContainer.appendChild(row); } }
+document.getElementById('adminBtn').onclick=()=>{ adminPanel.style.display='flex'; renderCodes(); };
+document.getElementById('closeAdmin').onclick=()=>{ adminPanel.style.display='none'; };
+document.getElementById('addCodeBtn').onclick=()=>{ const k=document.getElementById('newCodeInput').value.trim().toUpperCase(); const t=document.getElementById('newCodeType').value; if(!k) return alert('أدخل كود'); codes[k]={type:t,used:false}; renderCodes(); document.getElementById('newCodeInput').value=''; };
+
+// مساعدة: توليد عناصر المسار
+function createTrackForPool(rewardEl, pool){
+  rewardEl.innerHTML='';
+  const wrapper=document.createElement('div'); wrapper.className='roller-wrapper';
+  const track=document.createElement('div'); track.className='roller-track';
+  // كرر المحتوى عدة مرات لتجنب فراغات عند السرعة العالية
+  const repeat = Math.max(4, Math.ceil(800 / (pool.length * 120)));
+  for(let r=0;r<repeat;r++){
+    for(const item of pool){
+      const it=document.createElement('div'); it.className='roller-item';
+      it.innerHTML=`<img src="${item.img}" style="width:64px;height:64px"></div><div style="font-size:12px;white-space:nowrap">${item.name}</div>`;
+      track.appendChild(it);
+    }
+  }
+  wrapper.appendChild(track);
+  rewardEl.appendChild(wrapper);
+  const indicator=document.createElement('div'); indicator.className='roller-indicator'; rewardEl.appendChild(indicator);
+  return track;
+}
+
+// فتح الصندوق (يُستدعى فقط بعد تحقق الكود)
+function openCrate(chestId,rewardId,type,triggerButton){
+  const pool = rewardPools[type]; if(!pool) return;
+  const chest = document.getElementById(chestId); const reward = document.getElementById(rewardId);
+  const btn = triggerButton || null;
+  if(!chest || !reward) return;
+  if(btn) btn.disabled = true;
+
+  // افتح الغطاء بصرياً
+  chest.classList.remove('open'); void chest.offsetWidth; chest.classList.add('open');
+  document.getElementById('openSound').currentTime=0; document.getElementById('openSound').play();
+
+  // إعداد المسار
+  const track = createTrackForPool(reward, pool);
+  reward.style.display='block'; reward.classList.remove('show');
+
+  // تحريك المسار
+  let offset=0; let speed=16; let running=true; let last=performance.now();
+  function step(now){ if(!running) return; const dt = Math.min(40, now-last); last=now; offset -= speed * (dt/16); // frame-rate independent
+    const maxShift = track.scrollWidth/2 || (track.children.length*120);
+    if(Math.abs(offset) > maxShift) offset = offset % maxShift; track.style.transform = `translateX(${offset}px) translateY(-50%)`; requestAnimationFrame(step); }
+  requestAnimationFrame(step);
+
+  // بعد مدة، اختر العنصر النهائي وتوقف بموقعه
+  setTimeout(()=>{
+    running=false;
+    const chosen = pool[Math.floor(Math.random()*pool.length)];
+    // ابحث عن عنصر مطابق داخل track
+    let targetIndex = Math.floor(track.children.length/2);
+    for(let i=0;i<track.children.length;i++){
+      if(track.children[i].textContent.includes(chosen.name)) { targetIndex = i; break; }
+    }
+    const trackRect = track.getBoundingClientRect(); const itemRect = track.children[targetIndex].getBoundingClientRect(); const rewardRect = reward.getBoundingClientRect();
+    const itemCenter = itemRect.left - trackRect.left + itemRect.width/2; const desiredCenter = rewardRect.width/2;
+    const translateX = desiredCenter - itemCenter + offset;
+    track.style.transition = 'transform 1.8s cubic-bezier(.2,.8,.2,1)';
+    track.style.transform = `translateX(${translateX}px) translateY(-50%)`;
+    track.addEventListener('transitionend', function onEnd(){ track.removeEventListener('transitionend', onEnd);
+      reward.innerHTML = `<div style="display:flex;align-items:center;gap:12px;flex-direction:column"><img src="${chosen.img}" style="width:96px;height:96px"><div style="font-size:16px">${chosen.name}</div><div style="font-size:12px;color:#ccc">نسبة نادرة</div></div>`;
+      reward.classList.add('show'); spawnParticles(reward.parentElement); document.getElementById('rewardSound').currentTime=0; document.getElementById('rewardSound').play();
+      if(btn) setTimeout(()=>btn.disabled=false,500);
+    });
+  },2400);
+}
+
+// تأثيرات
+function spawnParticles(container){ for(let i=0;i<20;i++){ const p=document.createElement('div'); p.className='particle'; p.style.left='50%'; p.style.top='50%'; p.style.setProperty('--x',(Math.random()*300-150)+'px'); p.style.setProperty('--y',(Math.random()*-300)+'px'); container.appendChild(p); setTimeout(()=>p.remove(),1000); }}
+
+// عرض محتويات
+function fillPopups(){ document.getElementById('popup1').innerHTML = commonItems.map(i=>`• ${i.icon} ${i.name}`).join('<br>'); document.getElementById('popup2').innerHTML = rareItems.map(i=>`• ${i.icon} ${i.name}`).join('<br>'); document.getElementById('popup3').innerHTML = legendaryItems.map(i=>`• ${i.icon} ${i.name}`).join('<br>'); }
+
+// مودال وعمليات استبدال الأكواد
+let currentRedeem = { chestId:null, type:null, rewardId:null, button:null };
+const modalBackdrop = document.getElementById('modalBackdrop'); const redeemModal = document.getElementById('redeemModal'); const codeInput = document.getElementById('codeInput'); const redeemMsg = document.getElementById('redeemMsg');
+function openRedeemModal(chestId,type,rewardId,btn){ currentRedeem = { chestId, type, rewardId, button: btn }; codeInput.value=''; redeemMsg.textContent=''; modalBackdrop.style.display='flex'; codeInput.focus(); }
+function closeRedeemModal(){ modalBackdrop.style.display='none'; }
+function redeemCode(){ const code = codeInput.value.trim().toUpperCase(); if(!code){ redeemMsg.style.color='#ffcc00'; redeemMsg.textContent='المرجو إدخال كود صالح.'; return; } const entry = codes[code]; if(!entry){ redeemMsg.style.color='#ff6b6b'; redeemMsg.textContent='الكود غير موجود.'; return; } if(entry.used){ redeemMsg.style.color='#ff6b6b'; redeemMsg.textContent='الكود مستخدم.'; return; } if(entry.type !== currentRedeem.type){ redeemMsg.style.color='#ff6b6b'; redeemMsg.textContent='الكود لا يتوافق مع نوع هذا الصندوق.'; return; } // صالح
+ entry.used = true; saveCodes(); redeemMsg.style.color='#9aff9a'; redeemMsg.textContent='تم تفعيل الكود! فتح الصندوق...'; setTimeout(()=>{ closeRedeemModal(); openCrate(currentRedeem.chestId,currentRedeem.rewardId,currentRedeem.type,currentRedeem.button); },600);
+}
+
+// إدارة الأكواد (UI)
+function renderCodes(){ codesContainer.innerHTML=''; for(const [key,value] of Object.entries(codes)){ const row = document.createElement('div'); row.className='code-row'; row.innerHTML = `<span style="direction:ltr">${key}</span><span>${value.type} - ${value.used?'<strong style="color:#f66">مستعمل</strong>':'متاح'}</span>`; const delBtn = document.createElement('button'); delBtn.textContent='حذف'; delBtn.onclick = ()=>{ delete codes[key]; saveCodes(); renderCodes(); }; row.appendChild(delBtn); codesContainer.appendChild(row); } }
+
+// تهيئة
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.getElementById('year').textContent = new Date().getFullYear();
+  fillPopups();
+  // show buttons
+  document.getElementById('show1').onclick = ()=>{ const p=document.getElementById('popup1'); p.style.display = p.style.display==='flex'?'none':'flex'; };
+  document.getElementById('show2').onclick = ()=>{ const p=document.getElementById('popup2'); p.style.display = p.style.display==='flex'?'none':'flex'; };
+  document.getElementById('show3').onclick = ()=>{ const p=document.getElementById('popup3'); p.style.display = p.style.display==='flex'?'none':'flex'; };
+
+  // redeem buttons open modal and pass the trigger button so it will be disabled during open
+  document.getElementById('redeem1').onclick = function(){ openRedeemModal('chest1','common','r1', this); };
+  document.getElementById('redeem2').onclick = function(){ openRedeemModal('chest2','rare','r2', this); };
+  document.getElementById('redeem3').onclick = function(){ openRedeemModal('chest3','legendary','r3', this); };
+
+  document.getElementById('closeModal').onclick = closeRedeemModal;
+  document.getElementById('redeemSubmit').onclick = redeemCode;
+  codeInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter') redeemCode(); });
+
+  // admin panel
+  document.getElementById('adminBtn').onclick = ()=>{ adminPanel.style.display='flex'; renderCodes(); };
+  document.getElementById('closeAdmin').onclick = ()=>{ adminPanel.style.display='none'; };
+  document.getElementById('addCodeBtn').onclick = ()=>{ const k = document.getElementById('newCodeInput').value.trim().toUpperCase(); const t = document.getElementById('newCodeType').value; if(!k){ alert('أدخل كود'); return; } codes[k] = { type:t, used:false }; saveCodes(); renderCodes(); document.getElementById('newCodeInput').value=''; };
+
+  renderCodes();
+});
+</script>
+</body>
+</html>
